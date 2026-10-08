@@ -1,0 +1,30 @@
+[
+  {
+    "pregunta": "¿Qué hace raise_for_status() en requests y qué excepción lanza ante un error 4xx o 5xx?",
+    "documento_id_esperado": "requests.md"
+  },
+  {
+    "pregunta": "¿Cómo se lee todo el contenido de un archivo de texto usando pathlib?",
+    "documento_id_esperado": "pathlib.md"
+  },
+  {
+    "pregunta": "¿Cómo se agrupan las filas de un DataFrame por una columna y se calcula el promedio por grupo?",
+    "documento_id_esperado": "pandas.md"
+  },
+  {
+    "pregunta": "¿Cómo se ejecutan varias corrutinas en paralelo y se espera a que todas terminen?",
+    "documento_id_esperado": "asyncio.md"
+  },
+  {
+    "pregunta": "¿Cómo se valida automáticamente el cuerpo JSON de una petición con FastAPI y Pydantic?",
+    "documento_id_esperado": "fastapi.md"
+  },
+  {
+    "pregunta": "¿Cuál es la diferencia entre usar else y finally después de un bloque try/except?",
+    "documento_id_esperado": "manejo_de_excepciones.md"
+  },
+  {
+    "pregunta": "¿Cómo se declara un argumento que puede recibir None como valor usando type hints?",
+    "documento_id_esperado": "type_hints.md"
+  }
+]

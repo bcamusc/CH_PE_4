@@ -1,0 +1,20 @@
+# --- Variables de entorno (nunca subir claves) ---
+.env
+
+# --- Entorno virtual ---
+.venv/
+venv/
+
+# --- Python ---
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- Sistema ---
+.DS_Store
+Thumbs.db

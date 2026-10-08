@@ -1,0 +1,26 @@
+# ============================================================
+# Dependencias del modulo de recuperacion escalable (Pinecone)
+# Instalar con:  pip install -r requirements.txt
+# ============================================================
+
+# --- Núcleo LangChain (misma familia que la guia del profe) ---
+langchain
+langchain-classic
+langchain-core
+langchain-community
+langchain-text-splitters
+langchain-huggingface
+langchain-pinecone
+
+# --- Opcional: solo si EMBEDDING_PROVIDER=openai en el .env ---
+langchain-openai
+
+# --- Vector DB en la nube y utilidades ---
+pinecone
+sentence-transformers
+rank_bm25
+python-dotenv
+tiktoken
+
+# --- Carga de PDFs (opcional; el dataset incluido es Markdown) ---
+pypdf
