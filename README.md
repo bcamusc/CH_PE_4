@@ -6,8 +6,8 @@ Módulo de **Recuperación Escalable** en Python: un pipeline completo de RAG en
 
 | Rol | Tecnología |
 |-----|------------|
-| Orquestación | LangChain — `EnsembleRetriever`, `BM25Retriever`, `PineconeVectorStore` |
-| Base vectorial | **Pinecone Serverless** (aws / us-east-1, métrica cosine) |
+| Orquestación | LangChain — `EnsembleRetriever`, `BM25Retriever` |
+| Base vectorial | **Pinecone Serverless** (aws / us-east-1, métrica cosine) vía **SDK nativo** (`pinecone`) |
 | Embeddings | `sentence-transformers/all-MiniLM-L6-v2` local (384 dims, gratis) u OpenAI `text-embedding-3-small` (1536 dims) |
 | Búsqueda léxica | **BM25** (`rank_bm25`) |
 | Chunking | `RecursiveCharacterTextSplitter` — 600 tokens con 100 de solape |
@@ -24,7 +24,7 @@ flowchart LR
     end
     subgraph QRY["2. Consulta (src.rag_system)"]
         Q["Pregunta"] --> B["BM25Retriever<br/>léxico"]
-        Q --> V["PineconeVectorStore<br/>semántico"]
+        Q --> V["SDK Pinecone<br/>búsqueda semántica"]
         B --> R["EnsembleRetriever<br/>RRF · pesos 0.5 / 0.5"]
         V --> R
         R --> T["Top-5 fragmentos<br/>fuente + categoría + sección"]
@@ -67,6 +67,7 @@ flowchart LR
 - **Python 3.10+** (probado en 3.14)
 - Cuenta **gratuita** de Pinecone → API key en [app.pinecone.io](https://app.pinecone.io) → *API Keys*
 - Conexión a internet solo la primera vez (descarga el modelo de embeddings, ~90 MB)
+- Dependencias con **versiones fijadas** en `requirements.txt` para una instalación reproducible
 - *(Opcional)* API key de OpenAI, únicamente si prefieres `text-embedding-3-small`
 
 > 💡 No necesitas GPU ni tarjeta de crédito: el modelo de embeddings corre en CPU y el plan gratuito de Pinecone alcanza de sobra para este proyecto.
@@ -224,36 +225,38 @@ Métricas calculadas por `evaluate.py` (con `k = 5` por defecto):
 
 > 📌 Nota: como el Golden Set tiene **un solo documento esperado por pregunta**, el Recall@5 por documento solo puede dar 0% o 100% (no hay término medio matemáticamente posible). El Recall por chunks muestra el matiz intermedio.
 
-Ejemplo de salida en consola (ilustrativo; tus números pueden variar):
+Salida real en consola (extracto de la última corrida):
 
 ```text
 ================================================================================
 EVALUACION DEL RECUPERADOR HIBRIDO (BM25 + Pinecone)
 Indice: rag-tecnico-python | Namespace: docs-tecnicos | Embeddings: sentence-transformers/all-MiniLM-L6-v2 (384 dims)
-k = 5 | Preguntas del Golden Set: 7 | Chunks en el corpus: 16
+k = 5 | Preguntas del Golden Set: 7 | Chunks en el corpus: 22
 ================================================================================
 [OK] (1/7) ¿Qué hace raise_for_status() en requests y qué excepción lanza ante un error 4xx o 5xx?
         esperado:    requests.md
-        recuperados: requests.md, requests.md, pandas.md, pathlib.md, asyncio.md
-        Recall@5: 100% | Precision@5: 40.0% | Recall chunks@5: 100.0%
+        recuperados: requests.md, requests.md, manejo_de_excepciones.md, requests.md, manejo_de_excepciones.md
+        Recall@5: 100% | Precision@5: 60.0% | Recall chunks@5: 75.0%
 ...
 --------------------------------------------------------------------------------
 RESULTADOS PROMEDIOS
   Recall@5 (documento):  100.0%
-  Precision@5:           35.0%
-  Recall@5 (chunks):     90.0%
+  Precision@5:           51.4%
+  Recall@5 (chunks):     82.1%
 ```
 
 ## 📈 Resultados de la evaluación
 
-> ⚠️ **Completa esta tabla** después de correr `python -m src.evaluate` en tu cuenta. El detalle completo queda en `evaluation/resultados.json`.
+Resultados reales del pipeline completo (índice `rag-tecnico-python` de 384 dims, namespace `docs-tecnicos`, embeddings locales `all-MiniLM-L6-v2`, `k = 5`):
 
 | Métrica | Valor |
 |---------|-------|
 | Preguntas evaluadas | 7 |
-| Recall@5 promedio (documento) | _pendiente_ |
-| Precision@5 promedio | _pendiente_ |
-| Recall@5 promedio (chunks) | _pendiente_ |
+| Recall@5 promedio (documento) | **100.0%** (7/7) |
+| Precision@5 promedio | **51.4%** |
+| Recall@5 promedio (chunks) | **82.1%** |
+
+El detalle pregunta por pregunta quedó guardado en `evaluation/resultados.json`.
 
 ## 🧯 Errores comunes que este proyecto evita
 
@@ -292,3 +295,4 @@ Antes de subir, verifica que `.env` **no** aparezca en `git status` (debe estar 
 
 - El notebook de clases queda fuera de este repositorio a propósito; todo el flujo está en `src/`.
 - Los tests de métricas se ejecutan sin red ni API keys: `python tests/test_metricas.py`.
+- La conexión con Pinecone usa el **SDK nativo** (`pinecone==10.0.0`), una de las dos vías que acepta la consigna; LangChain sigue a cargo de los embeddings, BM25 y la combinación híbrida.

@@ -1,0 +1,118 @@
+{
+  "generado_en": "2026-10-08T01:17:28.167531+00:00",
+  "configuracion": {
+    "indice": "rag-tecnico-python",
+    "namespace": "docs-tecnicos",
+    "proveedor_embeddings": "huggingface",
+    "modelo_embeddings": "sentence-transformers/all-MiniLM-L6-v2",
+    "dimension": 384,
+    "k": 5
+  },
+  "k": 5,
+  "total_preguntas": 7,
+  "detalle": [
+    {
+      "pregunta": "¿Qué hace raise_for_status() en requests y qué excepción lanza ante un error 4xx o 5xx?",
+      "documento_esperado": "requests.md",
+      "documentos_recuperados": [
+        "requests.md",
+        "requests.md",
+        "manejo_de_excepciones.md",
+        "requests.md",
+        "manejo_de_excepciones.md"
+      ],
+      "recall@k": 1.0,
+      "precision@k": 0.6,
+      "recall_chunks@k": 0.75
+    },
+    {
+      "pregunta": "¿Cómo se lee todo el contenido de un archivo de texto usando pathlib?",
+      "documento_esperado": "pathlib.md",
+      "documentos_recuperados": [
+        "pathlib.md",
+        "pathlib.md",
+        "requests.md",
+        "pathlib.md",
+        "pandas.md"
+      ],
+      "recall@k": 1.0,
+      "precision@k": 0.6,
+      "recall_chunks@k": 1.0
+    },
+    {
+      "pregunta": "¿Cómo se agrupan las filas de un DataFrame por una columna y se calcula el promedio por grupo?",
+      "documento_esperado": "pandas.md",
+      "documentos_recuperados": [
+        "pandas.md",
+        "pandas.md",
+        "pandas.md",
+        "pathlib.md",
+        "type_hints.md"
+      ],
+      "recall@k": 1.0,
+      "precision@k": 0.6,
+      "recall_chunks@k": 1.0
+    },
+    {
+      "pregunta": "¿Cómo se ejecutan varias corrutinas en paralelo y se espera a que todas terminen?",
+      "documento_esperado": "asyncio.md",
+      "documentos_recuperados": [
+        "asyncio.md",
+        "asyncio.md",
+        "type_hints.md",
+        "manejo_de_excepciones.md",
+        "fastapi.md"
+      ],
+      "recall@k": 1.0,
+      "precision@k": 0.4,
+      "recall_chunks@k": 0.6666666666666666
+    },
+    {
+      "pregunta": "¿Cómo se valida automáticamente el cuerpo JSON de una petición con FastAPI y Pydantic?",
+      "documento_esperado": "fastapi.md",
+      "documentos_recuperados": [
+        "fastapi.md",
+        "requests.md",
+        "fastapi.md",
+        "type_hints.md",
+        "requests.md"
+      ],
+      "recall@k": 1.0,
+      "precision@k": 0.4,
+      "recall_chunks@k": 0.6666666666666666
+    },
+    {
+      "pregunta": "¿Cuál es la diferencia entre usar else y finally después de un bloque try/except?",
+      "documento_esperado": "manejo_de_excepciones.md",
+      "documentos_recuperados": [
+        "manejo_de_excepciones.md",
+        "manejo_de_excepciones.md",
+        "requests.md",
+        "asyncio.md",
+        "fastapi.md"
+      ],
+      "recall@k": 1.0,
+      "precision@k": 0.4,
+      "recall_chunks@k": 0.6666666666666666
+    },
+    {
+      "pregunta": "¿Cómo se declara un argumento que puede recibir None como valor usando type hints?",
+      "documento_esperado": "type_hints.md",
+      "documentos_recuperados": [
+        "type_hints.md",
+        "type_hints.md",
+        "type_hints.md",
+        "fastapi.md",
+        "manejo_de_excepciones.md"
+      ],
+      "recall@k": 1.0,
+      "precision@k": 0.6,
+      "recall_chunks@k": 1.0
+    }
+  ],
+  "promedios": {
+    "recall@k": 1.0,
+    "precision@k": 0.5142857142857143,
+    "recall_chunks@k": 0.8214285714285714
+  }
+}

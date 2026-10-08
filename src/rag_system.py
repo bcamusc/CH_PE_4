@@ -9,9 +9,11 @@ Rank Fusion y pesos configurables en el .env.
 
 from typing import Any, Dict, List, Optional
 
+# BM25Retriever vive en langchain-community (sigue siendo su ubicacion canonica
+# en LangChain 1.x; la importacion desde langchain-classic esta deprecada).
 from langchain_community.retrievers import BM25Retriever
 from langchain_core.documents import Document
-from langchain_pinecone import PineconeVectorStore
+from langchain_core.retrievers import BaseRetriever
 
 try:  # LangChain 1.x movio los retrievers clasicos al paquete langchain-classic
     from langchain_classic.retrievers import EnsembleRetriever
@@ -49,6 +51,37 @@ class RAGSystem:
                 }
             )
         return resultados
+
+
+class PineconeRetriever(BaseRetriever):
+    """Recuperador semantico contra un indice de Pinecone usando el SDK nativo.
+
+    Devuelve Documents cuyo page_content es el texto guardado en
+    metadata['text'] al momento de la ingesta: el contenido viaja dentro del
+    vector, sin consultas adicionales a otra base de datos.
+    """
+
+    indice: Any
+    embeddings: Any
+    namespace: str
+    k: int = 5
+
+    def _get_relevant_documents(self, query: str, *, run_manager: Any = None) -> List[Document]:
+        vector_consulta = self.embeddings.embed_query(query)
+        respuesta = self.indice.query(
+            vector=vector_consulta,
+            top_k=self.k,
+            include_metadata=True,
+            namespace=self.namespace,
+        )
+        coincidencias = leer_campo(respuesta, "matches", []) or []
+
+        documentos: List[Document] = []
+        for coincidencia in coincidencias:
+            metadata = dict(leer_campo(coincidencia, "metadata", {}) or {})
+            texto = metadata.pop("text", "")
+            documentos.append(Document(page_content=texto, metadata=metadata))
+        return documentos
 
 
 def _contar_vectores(indice: Any, namespace: str) -> int:
@@ -100,13 +133,14 @@ def construir_rag_system(
     retriever_bm25 = BM25Retriever.from_documents(chunks)
     retriever_bm25.k = k
 
-    # Recuperador semantico: similitud de coseno sobre los vectores de Pinecone.
-    vectorstore = PineconeVectorStore(
-        index=indice,
-        embedding=obtener_embeddings(),
+    # Recuperador semantico: similitud de coseno sobre los vectores de Pinecone
+    # (via SDK nativo; la consigna acepta explicitamente esta integracion).
+    retriever_vectorial = PineconeRetriever(
+        indice=indice,
+        embeddings=obtener_embeddings(),
         namespace=config.namespace,
+        k=k,
     )
-    retriever_vectorial = vectorstore.as_retriever(search_kwargs={"k": k})
 
     # Combinacion hibrida con pesos configurables (PESO_BM25 / PESO_VECTORIAL).
     retriever_hibrido = EnsembleRetriever(

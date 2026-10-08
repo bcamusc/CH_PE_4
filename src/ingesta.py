@@ -196,9 +196,7 @@ def preparar_registros(chunks: List[Document]) -> Tuple[List[str], List[Dict], L
 
 
 def ingerir(chunks: List[Document], recrear: bool = False) -> None:
-    """Sube los chunks (con sus embeddings) al indice y namespace configurados."""
-    from langchain_pinecone import PineconeVectorStore  # import local: solo se usa al ingerir
-
+    """Genera embeddings y sube los chunks al indice (SDK nativo de Pinecone)."""
     config = obtener_configuracion()
     indice = obtener_cliente().Index(config.index_name)
 
@@ -209,18 +207,24 @@ def ingerir(chunks: List[Document], recrear: bool = False) -> None:
         except Exception as error:  # el namespace puede no existir todavia
             print(f"[INFO] No se pudo vaciar el namespace (probablemente ya estaba vacio): {error}")
 
-    vectorstore = PineconeVectorStore(
-        index=indice,
-        embedding=obtener_embeddings(),
-        namespace=config.namespace,
-    )
-
     textos, metadatas, ids = preparar_registros(chunks)
-    print(
-        f"[..] Generando embeddings y subiendo {len(textos)} vectores a "
-        f"'{config.index_name}' (namespace '{config.namespace}')..."
-    )
-    vectorstore.add_texts(texts=textos, metadatas=metadatas, ids=ids)
+
+    print(f"[..] Generando embeddings de {len(textos)} chunks con '{config.embedding_model}'...")
+    embeddings = obtener_embeddings()
+    vectores = embeddings.embed_documents(textos)
+
+    print(f"[..] Subiendo vectores a '{config.index_name}' (namespace '{config.namespace}')...")
+    tamano_lote = 100
+    for inicio in range(0, len(ids), tamano_lote):
+        lote = [
+            {"id": identificador, "values": vector, "metadata": metadata}
+            for identificador, vector, metadata in zip(
+                ids[inicio : inicio + tamano_lote],
+                vectores[inicio : inicio + tamano_lote],
+                metadatas[inicio : inicio + tamano_lote],
+            )
+        ]
+        indice.upsert(vectors=lote, namespace=config.namespace)
 
     estadisticas = indice.describe_index_stats()
     print(f"[OK] Ingesta completada. Estadisticas del indice: {estadisticas}")
